@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriLedger — Farm Expense Management System</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23000000'/%3E%3Cpath d='M30 68c0-18 14-32 32-32h8v8c0 18-14 32-32 32h-8v-8z' fill='%23ffffff'/%3E%3Cpath d='M30 68c16-2 28-14 30-30' stroke='%23000000' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='54' cy='46' r='4' fill='%23000000'/%3E%3C/svg%3E">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<!-- Lucide icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<style>
+  /* ============ Monochromatic Theme Tokens (Light) ============ */
+  :root{
+    color-scheme: light;
+    --bg:            #fcfcfc;
+    --bg-dot:        rgba(0,0,0,0.065);
+    --card:          #ffffff;
+    --card-2:        #f5f5f5;
+    --card-3:        #ececec;
+    --border:        #e0e0e0;
+    --border-strong: #000000;
+    --border-hair:   #ebebeb;
+    --text:          #000000;
+    --muted:         #555555;
+    --faint:         #888888;
+    --accent:        #000000;
+    --accent-hover:  #222222;
+    --accent-soft:   rgba(0,0,0,0.06);
+    --on-accent:     #ffffff;
+    --ring:          rgba(0,0,0,0.22);
+    --hero-bg:       #000000;
+    --hero-fg:       #ffffff;
+    --hero-border:   #222222;
+    --shadow:        0 1px 3px rgba(0,0,0,0.05), 0 12px 30px -16px rgba(0,0,0,0.09);
+  }
+
+  /* ============ Monochromatic Theme Tokens (Dark) ============ */
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --bg:            #050505;
+      --bg-dot:        rgba(255,255,255,0.06);
+      --card:          #0e0e0e;
+      --card-2:        #161616;
+      --card-3:        #202020;
+      --border:        #262626;
+      --border-strong: #ffffff;
+      --border-hair:   #1a1a1a;
+      --text:          #ffffff;
+      --muted:         #a0a0a0;
+      --faint:         #666666;
+      --accent:        #ffffff;
+      --accent-hover:  #e0e0e0;
+      --accent-soft:   rgba(255,255,255,0.08);
+      --on-accent:     #000000;
+      --ring:          rgba(255,255,255,0.26);
+      --hero-bg:       #000000;
+      --hero-fg:       #ffffff;
+      --hero-border:   #333333;
+      --shadow:        0 1px 3px rgba(0,0,0,0.5), 0 16px 36px -16px rgba(0,0,0,0.7);
+    }
+  }
+
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    background-image: radial-gradient(var(--bg-dot) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .display{ font-family:'Space Grotesk','Inter',sans-serif; }
+  .num{ font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+  ::selection{ background:var(--text); color:var(--bg); }
+
+  /* ============ Structural Elements ============ */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+  }
+
+  /* ============ Buttons ============ */
+  .btn-primary{
+    background:var(--text); color:var(--bg);
+    font-weight:600; border-radius:10px;
+    border:1px solid var(--text);
+    transition:all .14s ease;
+  }
+  .btn-primary:hover{
+    background:transparent;
+    color:var(--text);
+  }
+  .btn-primary:active{ transform:scale(.98); }
+  .btn-primary:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--ring); }
+
+  .btn-ghost{
+    border:1px solid var(--border); color:var(--muted);
+    border-radius:10px; font-weight:500;
+    transition:all .14s ease; background:transparent;
+  }
+  .btn-ghost:hover{ color:var(--text); border-color:var(--text); background:var(--card-2); }
+  .btn-ghost:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--ring); }
+
+  .icon-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border-radius:8px;
+    color:var(--faint); border:1px solid transparent;
+    transition:all .14s ease;
+  }
+  .icon-btn:hover{
+    background:var(--text);
+    color:var(--bg);
+    border-color:var(--text);
+  }
+  .icon-btn:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--ring); }
+  .icon-btn:disabled{ opacity:.3; pointer-events:none; }
+
+  /* ============ Form Controls ============ */
+  .lbl{
+    display:block; font-size:10.5px; font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:6px;
+  }
+  .input{
+    width:100%; appearance:none;
+    background:var(--card-2); color:var(--text);
+    border:1px solid var(--border); border-radius:10px;
+    padding:9px 12px; font-size:13.5px; line-height:1.4;
+    transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .input::placeholder{ color:var(--faint); }
+  .input:hover{ border-color:var(--faint); }
+  .input:focus{ outline:none; border-color:var(--text); background:var(--card); box-shadow:0 0 0 2px var(--text); }
+  .input.is-invalid{ border-color:var(--text); outline:1px solid var(--text); }
+  select.input{ padding-right:34px; cursor:pointer; }
+  input[type="date"].input{ cursor:text; }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button{ -webkit-appearance:none; }
+  input[type=number]{ -moz-appearance:textfield; appearance:textfield; }
+
+  .err{
+    display:none; margin-top:5px;
+    font-size:11.5px; color:var(--text); font-weight:600;
+    padding:3px 8px; border-left:2px solid var(--text);
+    background:var(--card-2);
+  }
+  .err.show{ display:block; }
+
+  /* ============ Hero Monolith ============ */
+  .hero{
+    position:relative; overflow:hidden;
+    border-radius:18px;
+    background:var(--hero-bg);
+    color:var(--hero-fg);
+    border:1px solid var(--hero-border);
+    box-shadow:0 24px 48px -24px rgba(0,0,0,.6);
+  }
+  .hero::after{
+    content:''; position:absolute; inset:0; pointer-events:none; opacity:.22;
+    background-image:linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px),
+                     linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .hero > *{ position:relative; z-index:1; }
+
+  /* ============ Architectural Pattern Progress Bars ============ */
+  .bd-track{
+    height:9px; border-radius:4px; overflow:hidden; margin-top:7px;
+    background:var(--card-3);
+    border:1px solid var(--border);
+  }
+  .bd-fill{
+    height:100%; border-radius:2px; width:0%;
+    transition:width .65s cubic-bezier(.16,1,.3,1);
+  }
+
+  /* Monochrome Hatch Patterns */
+  .pat-solid      { background: var(--text); }
+  .pat-zebra      { background: repeating-linear-gradient(45deg, var(--text), var(--text) 4px, var(--card-3) 4px, var(--card-3) 8px); }
+  .pat-rev-zebra  { background: repeating-linear-gradient(-45deg, var(--text), var(--text) 4px, var(--card-3) 4px, var(--card-3) 8px); }
+  .pat-pinstripe  { background: repeating-linear-gradient(90deg, var(--text), var(--text) 2px, var(--card-3) 2px, var(--card-3) 5px); }
+  .pat-dots       { background-color: var(--text); background-image: radial-gradient(var(--bg) 1.5px, transparent 1.5px); background-size: 5px 5px; }
+  .pat-grey-80    { background: #333333; }
+  .pat-grey-60    { background: #666666; }
+  .pat-grey-40    { background: #999999; }
+  .pat-grey-20    { background: #cccccc; }
+
+  /* ============ Farm Badges & Chips ============ */
+  .farm-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:3px 9px; border-radius:6px;
+    font-size:11.5px; font-weight:700; letter-spacing:.02em;
+    border:1px solid var(--border-strong);
+    background:var(--card);
+    color:var(--text);
+  }
+
+  .cat-badge{
+    display:inline-flex; align-items:center; gap:5px;
+    padding:2px 8px; border-radius:6px;
+    font-size:11.5px; font-weight:500;
+    border:1px solid var(--border);
+    background:var(--card-2);
+    color:var(--text);
+  }
+
+  .fchip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 12px; border-radius:8px; white-space:nowrap;
+    border:1px solid var(--border); background:var(--card);
+    font-size:12px; font-weight:600; color:var(--muted);
+    transition:all .14s ease; cursor:pointer; flex:none;
+  }
+  .fchip:hover{ color:var(--text); border-color:var(--text); }
+  .fchip.active{ background:var(--text); border-color:var(--text); color:var(--bg); }
+  .fchip:focus-visible{ outline:none; box-shadow:0 0 0 2px var(--text); }
+
+  /* ============ Farm Cards ============ */
+  .farm-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:15px;
+    transition:all .16s ease;
+    cursor:pointer;
+    position:relative;
+  }
+  .farm-card:hover{
+    border-color:var(--text);
+    transform:translateY(-1.5px);
+    box-shadow:0 6px 20px -8px rgba(0,0,0,.15);
+  }
+  .farm-card.is-active{
+    border-color:var(--text);
+    border-width:2px;
+    background:var(--card-2);
+    box-shadow:0 0 0 1px var(--text);
+  }
+  .farm-card .tag-code{
+    font-family:'Space Grotesk', monospace;
+    font-size:10px; font-weight:700; letter-spacing:.12em;
+    padding:2px 6px; border:1px solid var(--border);
+    border-radius:4px;
+  }
+
+  /* ============ Table Styling ============ */
+  .tbl{ width:100%; border-collapse:collapse; }
+  .tbl th{
+    font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--faint); text-align:left;
+    padding:11px 12px; border-bottom:1px solid var(--border);
+  }
+  .tbl td{
+    padding:12px 12px; font-size:13px; vertical-align:middle;
+    border-bottom:1px solid var(--border-hair);
+  }
+  .tbl tbody tr{ transition:background .12s ease, opacity .16s ease; }
+  .tbl tbody tr:hover{ background:var(--card-2); }
+  .tbl tbody tr:last-child td{ border-bottom:none; }
+  .tbl tbody tr.leaving{ opacity:0; transform:translateX(8px); }
+  @keyframes rowflash{ 0%{ background:var(--card-3);} 100%{ background:transparent;} }
+  .tbl tbody tr.is-new{ animation:rowflash .85s ease-out; }
+
+  /* Mobile stacked rows */
+  @media (max-width:767px){
+    .tbl thead{ display:none; }
+    .tbl, .tbl tbody, .tbl tr, .tbl td{ display:block; width:100%; }
+    .tbl tbody tr{
+      background:var(--card-2); border:1px solid var(--border);
+      border-radius:12px; padding:12px; margin-bottom:10px;
+    }
+    .tbl tbody tr:hover{ background:var(--card-2); }
+    .tbl td{
+      border-bottom:none; padding:5px 0;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .tbl td + td{ border-top:1px dashed var(--border); }
+    .tbl td::before{
+      content:attr(data-label);
+      font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+      color:var(--faint); flex:none;
+    }
+  }
+
+  /* ============ Toast ============ */
+  .toast{
+    position:fixed; left:50%; bottom:26px; z-index:90;
+    transform:translate(-50%, 14px); opacity:0; pointer-events:none;
+    background:var(--text); color:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px; padding:9px 18px;
+    font-size:13px; font-weight:600;
+    display:flex; align-items:center; gap:8px;
+    box-shadow:0 12px 30px -8px rgba(0,0,0,.5);
+    transition:transform .24s cubic-bezier(.16,1,.3,1), opacity .24s ease;
+  }
+  .toast.show{ transform:translate(-50%, 0); opacity:1; }
+
+  /* ============ Modal ============ */
+  .modal{ display:none; }
+  .modal.open{ display:flex; }
+  @keyframes pop{ from{ opacity:0; transform:scale(.98);} to{ opacity:1; transform:none;} }
+  .modal-card{ animation:pop .2s cubic-bezier(.16,1,.3,1); }
+
+  .scrollbar-none{ scrollbar-width:none; }
+  .scrollbar-none::-webkit-scrollbar{ display:none; }
+  .lucide{ stroke-width:1.8; }
+</style>
+</head>
+
+<body>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28">
+
+    <!-- ================= Monochromatic Header ================= -->
+    <header class="flex flex-wrap items-center justify-between gap-4 py-6 border-b" style="border-color:var(--border)">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-none border"
+             style="background:var(--text); color:var(--bg); border-color:var(--text);">
+          <span class="display font-bold text-lg leading-none">▲</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="display font-bold text-[19px] tracking-tight">AGRI·LEDGER</h1>
+            <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 border rounded"
+                  style="border-color:var(--border); color:var(--muted)">SYSTEM 01</span>
+          </div>
+          <p class="text-xs" style="color:var(--muted)">Multi-entity agricultural financial ledger</p>
+        </div>
+      </div>
+
+      <!-- Action controls -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Currency selector -->
+        <div class="relative">
+          <label for="currencySelect" class="sr-only">Currency</label>
+          <select id="currencySelect" class="input text-[12px] font-semibold cursor-pointer py-1.5 pl-3 pr-7" style="width:auto">
+            <option value="KES">KES (KSh)</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="ZAR">ZAR (R)</option>
+            <option value="UGX">UGX (USh)</option>
+            <option value="TZS">TZS (TSh)</option>
+          </select>
+          <i data-lucide="chevron-down" class="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style="color:var(--faint)"></i>
+        </div>
+
+        <!-- Manage Farms Trigger -->
+        <button id="manageFarmsBtn" class="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-[12.5px]">
+          <span class="font-mono text-xs">■</span>
+          <span>Farms</span>
+        </button>
+
+        <!-- Manage Categories Trigger -->
+        <button id="manageCatsBtn" class="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-[12.5px]">
+          <i data-lucide="tag" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Categories</span>
+        </button>
+
+        <!-- Data dropdown -->
+        <div class="relative">
+          <button id="dataMenuBtn" class="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-[12.5px]">
+            <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+            <span>Data</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 opacity-60"></i>
+          </button>
+          <div id="dataDropdown" class="hidden absolute right-0 mt-1.5 w-52 card p-1.5 z-50 shadow-2xl text-[12.5px]">
+            <button id="exportCsvBtn" class="w-full text-left px-3 py-2 rounded hover:bg-[var(--card-2)] flex items-center gap-2">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Export CSV
+            </button>
+            <button id="exportJsonBtn" class="w-full text-left px-3 py-2 rounded hover:bg-[var(--card-2)] flex items-center gap-2">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Backup JSON
+            </button>
+            <label class="w-full text-left px-3 py-2 rounded hover:bg-[var(--card-2)] flex items-center gap-2 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> Restore JSON
+              <input id="importJsonInput" type="file" accept=".json" class="hidden">
+            </label>
+            <hr class="my-1" style="border-color:var(--border)">
+            <button id="clearAllBtn" class="w-full text-left px-3 py-2 rounded hover:bg-[var(--card-2)] text-[var(--muted)] flex items-center gap-2">
+              <i data-lucide="trash" class="w-3.5 h-3.5"></i> Reset All Records
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= Top Hero Monolith ================= -->
+    <section class="hero p-6 sm:p-8 mt-6" aria-live="polite">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-widest" style="color:rgba(255,255,255,0.6)">
+          <span class="inline-block w-2 h-2 bg-white"></span>
+          <span>AGGREGATED EXPENDITURE</span>
+        </div>
+        <div>
+          <p id="heroContext" class="font-mono text-[11px] px-3 py-1 rounded border tracking-wider"
+             style="color:rgba(255,255,255,.85); background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.18)">
+            ALL ENTITIES // ALL CATEGORIES // ALL TIME
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-baseline gap-3">
+        <span id="curSym" class="display font-mono text-xl sm:text-2xl font-normal" style="color:rgba(255,255,255,.5)">KES</span>
+        <span id="totalVal" data-value="0" class="display num font-bold tracking-tight text-[2.9rem] leading-none sm:text-6xl" style="color:#ffffff">0.00</span>
+      </div>
+      <p id="allTimeNote" class="hidden mt-2 text-xs font-mono" style="color:rgba(255,255,255,.45)"></p>
+
+      <!-- Key Ledger Telemetry -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-7 pt-5 border-t" style="border-color:rgba(255,255,255,.14)">
+        <div>
+          <p class="font-mono text-[9.5px] uppercase tracking-widest" style="color:rgba(255,255,255,.45)">Entries Recorded</p>
+          <p id="statEntries" class="display num mt-1 text-[16px] font-bold" style="color:#ffffff">0</p>
+        </div>
+        <div>
+          <p class="font-mono text-[9.5px] uppercase tracking-widest" style="color:rgba(255,255,255,.45)">Average / Entry</p>
+          <p id="statAvg" class="display num mt-1 text-[16px] font-bold" style="color:#ffffff">—</p>
+        </div>
+        <div>
+          <p class="font-mono text-[9.5px] uppercase tracking-widest" style="color:rgba(255,255,255,.45)">Primary Cost Entity</p>
+          <p id="statTopFarm" class="display mt-1 text-[15px] font-bold truncate" style="color:#ffffff">—</p>
+        </div>
+        <div>
+          <p class="font-mono text-[9.5px] uppercase tracking-widest" style="color:rgba(255,255,255,.45)">Major Expense Type</p>
+          <p id="statTopCat" class="display mt-1 text-[15px] font-bold truncate" style="color:#ffffff">—</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Entity / Farm Matrix Grid ================= -->
+    <section class="mt-7">
+      <div class="flex items-center justify-between gap-3 mb-3.5">
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-xs font-bold">■</span>
+          <h2 class="display font-bold text-[15.5px] tracking-tight uppercase">Entities & Farms Overview</h2>
+          <span class="text-xs hidden sm:inline" style="color:var(--muted)">— click an entity card to isolate records</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="viewAllFarmsBtn" class="text-xs font-mono uppercase tracking-wider font-semibold underline hover:opacity-75">
+            Show All Entities
+          </button>
+          <button id="addFarmHeaderBtn" class="text-xs font-mono uppercase tracking-wider font-bold px-2.5 py-1 border border-current rounded hover:bg-[var(--text)] hover:text-[var(--bg)] transition-colors">
+            + Add Farm
+          </button>
+        </div>
+      </div>
+
+      <!-- Farm Cards Grid or Empty State -->
+      <div id="farmCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"></div>
+      <div id="noFarmsBanner" class="hidden p-8 border-2 border-dashed border-[var(--border)] rounded-xl text-center bg-[var(--card)]">
+        <span class="font-mono text-xl font-bold block mb-1">■</span>
+        <h3 class="display font-bold text-[16px] uppercase tracking-tight">No Farms Registered Yet</h3>
+        <p class="text-xs text-[var(--muted)] max-w-md mx-auto mt-1 mb-4">
+          Add your farms or entity units to begin tracking and managing specific farm expenses.
+        </p>
+        <button id="addFirstFarmBtn" class="btn-primary px-4 py-2 text-xs font-mono uppercase tracking-wider">
+          + Register First Farm
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= Main Workspace ================= -->
+    <main class="grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-6 mt-7 items-start">
+
+      <!-- Left Column: Form & Patterns Breakdown -->
+      <div class="space-y-6">
+
+        <!-- Entry Form Card -->
+        <section id="formCard" class="card p-5 sm:p-6 transition-all duration-200">
+          <div class="flex items-center justify-between gap-3 border-b pb-3.5" style="border-color:var(--border)">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 bg-[var(--text)]"></span>
+              <h2 id="formTitle" class="display font-bold text-[15.5px] tracking-tight uppercase">Record Expense</h2>
+            </div>
+            <span id="editingBadge" class="hidden text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 border border-current">
+              EDITING
+            </span>
+          </div>
+
+          <form id="expForm" class="mt-4 space-y-4" novalidate>
+            <!-- Entity Selection -->
+            <div>
+              <div class="flex items-center justify-between">
+                <label class="lbl" for="fFarm">Assigned Entity</label>
+                <button type="button" id="quickAddFarmBtn" class="text-[11px] font-mono uppercase tracking-wider underline hover:opacity-70 mb-1">+ New Entity</button>
+              </div>
+              <div class="relative">
+                <select id="fFarm" class="input font-medium"></select>
+                <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color:var(--faint)"></i>
+              </div>
+              <p class="err" id="errFarm"></p>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="lbl" for="fDesc">Specification / Item</label>
+              <input id="fDesc" type="text" class="input" placeholder="e.g. 50kg CAN Fertilizer, Tractor Fuel" maxlength="140" autocomplete="off">
+              <p class="err" id="errDesc"></p>
+            </div>
+
+            <!-- Amount and Date -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="lbl" for="fAmount">Amount</label>
+                <div class="relative">
+                  <input id="fAmount" type="number" class="input num font-semibold" style="padding-left:48px; padding-right:8px;" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] font-mono font-bold pointer-events-none" style="color:var(--faint)" id="curHint">KES</span>
+                </div>
+                <p class="err" id="errAmount"></p>
+              </div>
+              <div>
+                <label class="lbl" for="fDate">Transaction Date</label>
+                <input id="fDate" type="date" class="input font-mono text-[13px]">
+                <p class="err" id="errDate"></p>
+              </div>
+            </div>
+
+            <!-- Category -->
+            <div>
+              <label class="lbl" for="fCategory">Account Category</label>
+              <div class="relative">
+                <select id="fCategory" class="input"></select>
+                <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color:var(--faint)"></i>
+              </div>
+              <p class="err" id="errCategory"></p>
+            </div>
+
+            <!-- Receipt Reference / Note -->
+            <div>
+              <label class="lbl" for="fNotes">Voucher / Receipt Ref (Optional)</label>
+              <input id="fNotes" type="text" class="input text-[13px]" placeholder="e.g. Receipt #9021, Agrovet invoice" maxlength="120" autocomplete="off">
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex gap-2 pt-2">
+              <button type="submit" id="submitBtn" class="btn-primary flex-1 py-2.5 text-[13.5px] uppercase font-mono tracking-wider flex items-center justify-center gap-2">
+                <span id="submitIcon">■</span>
+                <span id="submitLabel">Commit Entry</span>
+              </button>
+              <button type="button" id="cancelEdit" class="btn-ghost hidden px-3 text-[13px] uppercase font-mono">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Distribution & Pattern Breakdown -->
+        <section class="card p-5 sm:p-6">
+          <div class="flex items-center justify-between border-b pb-3 mb-4" style="border-color:var(--border)">
+            <h2 class="display font-bold text-[14.5px] tracking-tight uppercase">Cost Allocation</h2>
+            <!-- Switch between Farm and Category -->
+            <div class="inline-flex rounded border p-0.5 text-xs font-mono" style="border-color:var(--border); background:var(--card-2)">
+              <button id="tabByFarm" class="px-2.5 py-1 rounded transition-all font-bold bg-[var(--text)] text-[var(--bg)]">BY ENTITY</button>
+              <button id="tabByCat" class="px-2.5 py-1 rounded transition-all text-[var(--muted)] hover:text-[var(--text)]">BY ACCOUNT</button>
+            </div>
+          </div>
+          <div id="breakdownList" class="space-y-4"></div>
+        </section>
+      </div>
+
+      <!-- Right Column: Ledger Table & Filters -->
+      <section class="card sm:min-h-[580px] flex flex-col">
+        <!-- Toolbar -->
+        <div class="p-5 sm:p-6 pb-4 border-b space-y-4" style="border-color:var(--border)">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <h2 class="display font-bold text-[16px] tracking-tight uppercase">Transaction Register</h2>
+              <span id="listCount" class="num font-mono text-[11px] font-bold px-2 py-0.5 rounded border"
+                    style="border-color:var(--border); color:var(--text); background:var(--card-2)">0</span>
+            </div>
+
+            <!-- Period filter -->
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-[10.5px] uppercase tracking-wider" style="color:var(--muted)">Period:</span>
+              <div class="relative">
+                <select id="monthSelect" class="input font-mono text-[12px] font-semibold cursor-pointer py-1 pl-2.5 pr-7" style="width:auto">
+                  <option value="all">ALL PERIODS</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style="color:var(--faint)"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2.5">
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color:var(--faint)"></i>
+              <input id="searchInput" type="text" class="input pl-9 text-[13px]" placeholder="Search specification, voucher, entity..." autocomplete="off">
+              <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono underline">CLEAR</button>
+            </div>
+
+            <!-- Category filter -->
+            <div class="relative">
+              <select id="categoryFilterSelect" class="input text-[12.5px] font-medium cursor-pointer py-2 pl-3 pr-8" style="width:auto">
+                <option value="All">All Categories</option>
+              </select>
+              <i data-lucide="filter" class="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style="color:var(--faint)"></i>
+            </div>
+          </div>
+
+          <!-- Entity Filter Pills -->
+          <div class="flex items-center gap-2 pt-1">
+            <span class="font-mono text-[10px] uppercase tracking-widest text-[var(--faint)] flex-none">Filter:</span>
+            <div id="farmPillRow" class="flex gap-1.5 overflow-x-auto scrollbar-none pb-1" role="group" aria-label="Filter by farm">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Ledger Table -->
+        <div class="px-2 sm:px-4 pb-4 flex-1 overflow-x-auto">
+          <table class="tbl" id="expTable">
+            <colgroup>
+              <col style="width:115px">
+              <col style="width:160px">
+              <col style="width:160px">
+              <col>
+              <col style="width:140px">
+              <col style="width:80px">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Entity</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th style="text-align:right">Debit</th>
+                <th style="text-align:center"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="expBody"></tbody>
+          </table>
+
+          <!-- Empty: Zero items in ledger -->
+          <div id="emptyState" class="hidden py-16 text-center">
+            <div class="w-12 h-12 mx-auto border-2 border-dashed border-[var(--border-strong)] flex items-center justify-center">
+              <span class="font-mono text-xl font-bold">∅</span>
+            </div>
+            <h3 class="display mt-4 font-bold text-[15px] uppercase">Ledger is empty</h3>
+            <p class="mt-1 text-xs max-w-[280px] mx-auto" style="color:var(--muted)">Use the form on the left to record your first farm expense.</p>
+          </div>
+
+          <!-- Empty: Filtered out -->
+          <div id="emptyFiltered" class="hidden py-16 text-center">
+            <div class="w-12 h-12 mx-auto border border-dashed border-[var(--border)] flex items-center justify-center font-mono">
+              [0]
+            </div>
+            <h3 class="display mt-4 font-bold text-[14.5px] uppercase">No matching records</h3>
+            <p class="mt-1 text-xs" style="color:var(--muted)">No entries match the currently applied criteria.</p>
+            <button id="resetFiltersBtn" class="btn-ghost mt-4 px-4 py-1 text-xs font-mono uppercase">Reset Criteria</button>
+          </div>
+        </div>
+
+        <!-- Ledger Footer Summary -->
+        <div id="tableFooter" class="p-4 border-t flex flex-wrap items-center justify-between gap-3 text-xs font-mono" style="border-color:var(--border); color:var(--muted)">
+          <div>
+            RECORDS: <span id="filteredCount" class="font-bold text-[var(--text)]">0</span> / <span id="totalCount" class="font-bold text-[var(--text)]">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span>FILTERED TOTAL:</span>
+            <span id="filteredSum" class="font-bold text-sm text-[var(--text)] num">0.00</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-xs font-mono space-y-1.5" style="color:var(--faint)">
+      <p>AGRI·LEDGER MONOCHROME FINANCIAL SYSTEM // DATA PERSISTED LOCALLY</p>
+      <p>All data is maintained in device storage.</p>
+    </footer>
+  </div>
+
+  <!-- ================= Modal: Manage Farms / Entities ================= -->
+  <div id="farmModal" class="modal fixed inset-0 z-[70] items-end sm:items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="farmModalTitle">
+    <div id="farmModalOverlay" class="absolute inset-0 bg-black/70 backdrop-blur-xs"></div>
+    <div class="modal-card card relative w-full sm:max-w-lg p-6 sm:p-7 max-h-[88vh] overflow-y-auto border-2 border-[var(--border-strong)]">
+      <div class="flex items-start justify-between gap-4 border-b pb-3.5" style="border-color:var(--border)">
+        <div>
+          <h3 id="farmModalTitle" class="display text-base font-bold uppercase tracking-tight">Farm Entities Registry</h3>
+          <p class="text-xs mt-0.5" style="color:var(--muted)">Add, rename, or remove registered farm entities.</p>
+        </div>
+        <button id="closeFarmModal" class="icon-btn flex-none" aria-label="Close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <!-- Add or Edit Farm Form -->
+      <form id="farmForm" class="mt-4 p-4 border rounded space-y-3" style="border-color:var(--border); background:var(--card-2)">
+        <div class="flex items-center justify-between">
+          <h4 id="farmFormHeading" class="font-mono text-[10.5px] uppercase font-bold tracking-wider text-[var(--muted)]">Add Registered Entity</h4>
+          <span id="farmEditingBadge" class="hidden text-[9px] font-mono font-bold uppercase tracking-widest px-1.5 py-0.5 border border-current">EDITING</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input id="farmNameInput" type="text" class="input text-[13px]" placeholder="Entity Name (e.g. North Plot)" maxlength="32" autocomplete="off" required>
+          <input id="farmLocInput" type="text" class="input text-[13px]" placeholder="Descriptor (e.g. Dairy Barn)" maxlength="32" autocomplete="off">
+        </div>
+        <div>
+          <label class="font-mono text-[10px] font-bold uppercase text-[var(--muted)] mb-1 block">Motif Glyph & Hatch</label>
+          <div id="glyphPickerRow" class="flex gap-2 items-center flex-wrap"></div>
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button type="submit" id="farmSubmitBtn" class="btn-primary flex-1 py-2 text-xs font-mono uppercase tracking-wider">
+            + Add Entity to Registry
+          </button>
+          <button type="button" id="cancelFarmEditBtn" class="btn-ghost hidden px-3 text-xs font-mono uppercase">
+            Cancel
+          </button>
+        </div>
+        <p class="err" id="farmFormErr"></p>
+      </form>
+
+      <!-- Farm List -->
+      <div class="mt-5">
+        <h4 class="font-mono text-[10.5px] uppercase font-bold tracking-wider text-[var(--muted)] mb-2">Registered Entities</h4>
+        <div id="farmModalList" class="divide-y border rounded overflow-hidden" style="border-color:var(--border)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Modal: Manage Categories ================= -->
+  <div id="catModal" class="modal fixed inset-0 z-[70] items-end sm:items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="catModalTitle">
+    <div id="catModalOverlay" class="absolute inset-0 bg-black/70 backdrop-blur-xs"></div>
+    <div class="modal-card card relative w-full sm:max-w-md p-6 sm:p-7 max-h-[85vh] overflow-y-auto border-2 border-[var(--border-strong)]">
+      <div class="flex items-start justify-between gap-4 border-b pb-3.5" style="border-color:var(--border)">
+        <div>
+          <h3 id="catModalTitle" class="display text-base font-bold uppercase tracking-tight">Chart of Accounts</h3>
+          <p class="text-xs mt-0.5" style="color:var(--muted)">Agricultural expenditure classifications.</p>
+        </div>
+        <button id="closeCatModal" class="icon-btn flex-none" aria-label="Close"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <form id="catForm" class="flex gap-2 mt-4">
+        <input id="newCatName" type="text" class="input text-[13px]" placeholder="New account category..." maxlength="30" autocomplete="off" required>
+        <button type="submit" class="btn-primary px-3 text-xs font-mono uppercase tracking-wider whitespace-nowrap">
+          + Add
+        </button>
+      </form>
+      <p class="err" id="catErr"></p>
+
+      <div id="catList" class="mt-4 divide-y border rounded overflow-hidden" style="border-color:var(--border)"></div>
+    </div>
+  </div>
+
+  <!-- ================= Toast ================= -->
+  <div id="toast" class="toast font-mono" role="status">
+    <span>■</span>
+    <span id="toastMsg"></span>
+  </div>
+
+<script>
+/* =====================================================================
+   AgriLedger — Zero-Seeded Clean Management Engine
+===================================================================== */
+
+const STORAGE_KEY = 'agri_ledger_live_v1';
+
+/* --- Architectural Motifs & Patterns --- */
+const MOTIFS = [
+  { glyph: '■', pattern: 'pat-solid',     code: '01' },
+  { glyph: '▲', pattern: 'pat-zebra',     code: '02' },
+  { glyph: '●', pattern: 'pat-rev-zebra', code: '03' },
+  { glyph: '◆', pattern: 'pat-pinstripe', code: '04' },
+  { glyph: '⬡', pattern: 'pat-dots',      code: '05' },
+  { glyph: '✦', pattern: 'pat-grey-80',   code: '06' },
+  { glyph: '▼', pattern: 'pat-grey-60',   code: '07' },
+  { glyph: '★', pattern: 'pat-grey-40',   code: '08' }
+];
+
+const DEFAULT_CURRENCY = 'KES';
+
+// Standard agricultural classifications (customizable)
+const DEFAULT_CATEGORIES = [
+  { name: 'Seeds & Seedlings',           pattern: 'pat-solid',     custom: false },
+  { name: 'Fertilizers & Chemicals',     pattern: 'pat-zebra',     custom: false },
+  { name: 'Animal Feed & Vet Care',      pattern: 'pat-rev-zebra', custom: false },
+  { name: 'Fuel & Machinery Maintenance',pattern: 'pat-pinstripe', custom: false },
+  { name: 'Labor & Wages',               pattern: 'pat-dots',      custom: false },
+  { name: 'Irrigation & Water',          pattern: 'pat-grey-80',   custom: false },
+  { name: 'Packaging & Storage',         pattern: 'pat-grey-60',   custom: false },
+  { name: 'Transport & Logistics',       pattern: 'pat-grey-40',   custom: false },
+  { name: 'Tools, Repairs & Equipment',  pattern: 'pat-grey-20',   custom: false },
+  { name: 'General Farm Overhead',       pattern: 'pat-solid',     custom: false },
+];
+
+/* --- State (Unseeded Clean Slate) --- */
+let state = {
+  currency: DEFAULT_CURRENCY,
+  farms: [],        // { id, name, location, glyph, pattern, code }
+  categories: [...DEFAULT_CATEGORIES],
+  expenses: []     // { id, farmId, desc, amount, category, date, notes, seq }
+};
+
+let filter = {
+  farmId: 'all',
+  category: 'All',
+  month: 'all',
+  query: ''
+};
+
+let activeBreakdownTab = 'farm'; // 'farm' | 'category'
+let editingExpenseId = null;
+let editingFarmId = null;
+let lastAddedExpenseId = null;
+let selectedMotifIndex = 0;
+
+/* --- Helpers --- */
+const qs = s => document.querySelector(s);
+const qsa = s => [...document.querySelectorAll(s)];
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+
+const fmtNum = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtMoney = n => `${state.currency} ${fmtNum(n)}`;
+
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+
+const parseISO = s => {
+  if (!s) return new Date();
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d);
+};
+
+const fmtDate = s => {
+  try {
+    return parseISO(s).toLocaleDateString('en-US', { day:'2-digit', month:'short', year:'numeric' });
+  } catch(e) {
+    return s;
+  }
+};
+
+const monthLabel = key => {
+  try {
+    const [y,m] = key.split('-').map(Number);
+    return new Date(y, m-1, 1).toLocaleDateString('en-US', { month:'short', year:'numeric' }).toUpperCase();
+  } catch(e) {
+    return key;
+  }
+};
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const farmOf = id => state.farms.find(f => f.id === id) || { id, name:'Unknown Entity', glyph:'■', pattern:'pat-solid', location:'', code:'00' };
+
+/* --- Storage Engine --- */
+function loadState(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw){
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object'){
+        if (Array.isArray(parsed.farms)) state.farms = parsed.farms;
+        if (Array.isArray(parsed.categories) && parsed.categories.length) state.categories = parsed.categories;
+        if (Array.isArray(parsed.expenses)) state.expenses = parsed.expenses;
+        if (parsed.currency) state.currency = parsed.currency;
+        return;
+      }
+    }
+  } catch(e){
+    console.error('Error loading state:', e);
+  }
+}
+
+function saveState(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      currency: state.currency,
+      farms: state.farms,
+      categories: state.categories,
+      expenses: state.expenses
+    }));
+  } catch(e){
+    console.error('Failed to save state:', e);
+  }
+}
+
+/* --- Toast --- */
+let toastTimer;
+function toast(msg){
+  const t = qs('#toast');
+  qs('#toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* --- Animated Grand Total --- */
+let tweenRAF;
+function tweenTotal(to){
+  const el = qs('#totalVal');
+  const from = parseFloat(el.dataset.value || '0');
+  cancelAnimationFrame(tweenRAF);
+  const start = performance.now(), dur = 420;
+  const tick = t => {
+    const p = Math.min(1, (t - start) / dur);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmtNum(from + (to - from) * e);
+    if (p < 1) tweenRAF = requestAnimationFrame(tick);
+    else el.dataset.value = to;
+  };
+  tweenRAF = requestAnimationFrame(tick);
+}
+
+/* --- Filtered Expenses --- */
+function getVisibleExpenses(){
+  const q = filter.query.trim().toLowerCase();
+  return state.expenses
+    .filter(e => {
+      if (filter.farmId !== 'all' && e.farmId !== filter.farmId) return false;
+      if (filter.category !== 'All' && e.category !== filter.category) return false;
+      if (filter.month !== 'all' && !e.date.startsWith(filter.month)) return false;
+      if (q){
+        const f = farmOf(e.farmId);
+        const matchDesc = e.desc && e.desc.toLowerCase().includes(q);
+        const matchNotes = e.notes && e.notes.toLowerCase().includes(q);
+        const matchFarm = f.name && f.name.toLowerCase().includes(q);
+        const matchCat = e.category && e.category.toLowerCase().includes(q);
+        if (!matchDesc && !matchNotes && !matchFarm && !matchCat) return false;
+      }
+      return true;
+    })
+    .sort((a,b) => b.date.localeCompare(a.date) || (b.seq || 0) - (a.seq || 0));
+}
+
+/* --- Render UI Components --- */
+
+function renderHeroAndStats(){
+  const list = getVisibleExpenses();
+  const filteredTotal = list.reduce((s,e) => s + e.amount, 0);
+  tweenTotal(filteredTotal);
+
+  qs('#curSym').textContent = state.currency;
+  qs('#curHint').textContent = state.currency;
+
+  const farmLabel = filter.farmId === 'all' ? 'ALL ENTITIES' : farmOf(filter.farmId).name.toUpperCase();
+  const catLabel = filter.category === 'All' ? 'ALL CATEGORIES' : filter.category.toUpperCase();
+  const moLabel = filter.month === 'all' ? 'ALL TIME' : monthLabel(filter.month);
+  qs('#heroContext').textContent = `${farmLabel} // ${catLabel} // ${moLabel}`;
+
+  const isFiltered = filter.farmId !== 'all' || filter.category !== 'All' || filter.month !== 'all' || filter.query;
+  const note = qs('#allTimeNote');
+  if (isFiltered){
+    const allTotal = state.expenses.reduce((s,e) => s + e.amount, 0);
+    note.textContent = `Aggregate ledger total across all entities: ${fmtMoney(allTotal)}`;
+    note.classList.remove('hidden');
+  } else {
+    note.classList.add('hidden');
+  }
+
+  qs('#statEntries').textContent = list.length;
+  qs('#statAvg').textContent = list.length ? fmtMoney(filteredTotal / list.length) : '—';
+
+  // Primary cost farm in current view
+  const farmSums = {};
+  state.farms.forEach(f => farmSums[f.id] = 0);
+  list.forEach(e => { farmSums[e.farmId] = (farmSums[e.farmId] || 0) + e.amount; });
+  const topFarmEntry = Object.entries(farmSums).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1])[0];
+  qs('#statTopFarm').textContent = topFarmEntry ? farmOf(topFarmEntry[0]).name : '—';
+
+  // Top category
+  const catSums = {};
+  list.forEach(e => { catSums[e.category] = (catSums[e.category] || 0) + e.amount; });
+  const topCatEntry = Object.entries(catSums).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1])[0];
+  qs('#statTopCat').textContent = topCatEntry ? topCatEntry[0] : '—';
+}
+
+function renderFarmSummaryCards(){
+  const grid = qs('#farmCardsGrid');
+  const banner = qs('#noFarmsBanner');
+  const hasFarms = state.farms.length > 0;
+
+  grid.classList.toggle('hidden', !hasFarms);
+  banner.classList.toggle('hidden', hasFarms);
+
+  if (!hasFarms){
+    grid.innerHTML = '';
+    return;
+  }
+
+  const allExpenses = state.expenses;
+  const overallTotal = allExpenses.reduce((s,e) => s + e.amount, 0);
+
+  grid.innerHTML = state.farms.map(farm => {
+    const farmExpenses = allExpenses.filter(e => e.farmId === farm.id);
+    const farmTotal = farmExpenses.reduce((s,e) => s + e.amount, 0);
+    const pct = overallTotal > 0 ? ((farmTotal / overallTotal) * 100) : 0;
+    const isSelected = filter.farmId === farm.id;
+
+    const catMap = {};
+    farmExpenses.forEach(e => catMap[e.category] = (catMap[e.category] || 0) + e.amount);
+    const topCat = Object.entries(catMap).sort((a,b) => b[1] - a[1])[0];
+
+    return `
+      <div class="farm-card ${isSelected ? 'is-active' : ''}" data-farm-id="${farm.id}">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <span class="tag-code text-[var(--faint)]">ENTITY ${farm.code || '00'}</span>
+            <h3 class="font-bold text-[14px] truncate mt-1 flex items-center gap-1.5">
+              <span class="font-mono">${farm.glyph || '■'}</span>
+              ${esc(farm.name)}
+            </h3>
+            ${farm.location ? `<p class="text-[11px] truncate mt-0.5" style="color:var(--faint)">${esc(farm.location)}</p>` : ''}
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="icon-btn" data-farm-edit="${farm.id}" title="Edit Farm" aria-label="Edit Entity"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+            ${isSelected ? `<span class="text-[9px] font-mono font-bold uppercase tracking-widest px-1 py-0.5 border border-current">ACTIVE</span>` : ''}
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <p class="font-mono text-[9.5px] uppercase tracking-widest" style="color:var(--muted)">Allocated</p>
+          <p class="display num font-bold text-lg tracking-tight mt-0.5" style="color:var(--text)">${fmtMoney(farmTotal)}</p>
+        </div>
+
+        <!-- Pattern Progress Track -->
+        <div class="bd-track mt-2">
+          <div class="bd-fill ${farm.pattern || 'pat-solid'}" style="width:${pct.toFixed(2)}%;"></div>
+        </div>
+
+        <div class="mt-2.5 pt-2 flex items-center justify-between text-[11px] font-mono border-t" style="border-color:var(--border-hair); color:var(--muted)">
+          <span>${pct.toFixed(1)}% (${farmExpenses.length})</span>
+          <div class="flex items-center gap-1.5">
+            <button class="text-[10px] underline hover:opacity-75" data-farm-add-exp="${farm.id}">+ Expense</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderFarmPills(){
+  const row = qs('#farmPillRow');
+  const mk = (id, name, glyph) => `
+    <button class="fchip font-mono ${filter.farmId === id ? 'active' : ''}" data-farm-filter="${esc(id)}">
+      ${glyph ? `<span>${glyph}</span>` : ''}
+      <span>${esc(name)}</span>
+    </button>
+  `;
+  row.innerHTML = mk('all', 'ALL ENTITIES', '') + state.farms.map(f => mk(f.id, f.name, f.glyph)).join('');
+}
+
+function renderSelectOptions(){
+  const fFarm = qs('#fFarm');
+  const prevFarm = fFarm.value;
+  const hasFarms = state.farms.length > 0;
+
+  if (hasFarms){
+    fFarm.innerHTML = state.farms.map(f => `<option value="${f.id}">[${f.code||'--'}] ${f.glyph||'■'} ${esc(f.name)} ${f.location ? `(${esc(f.location)})` : ''}</option>`).join('');
+    if (state.farms.some(f => f.id === prevFarm)){
+      fFarm.value = prevFarm;
+    } else if (filter.farmId !== 'all' && state.farms.some(f => f.id === filter.farmId)){
+      fFarm.value = filter.farmId;
+    }
+  } else {
+    fFarm.innerHTML = `<option value="">-- No Farms Registered Yet --</option>`;
+  }
+
+  const fCat = qs('#fCategory');
+  const prevCat = fCat.value;
+  fCat.innerHTML = state.categories.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+  if (state.categories.some(c => c.name === prevCat)) fCat.value = prevCat;
+
+  const catFilter = qs('#categoryFilterSelect');
+  const prevCatFilter = filter.category;
+  catFilter.innerHTML = `<option value="All">All Categories</option>` +
+    state.categories.map(c => `<option value="${esc(c.name)}" ${c.name === prevCatFilter ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+
+  const monthSel = qs('#monthSelect');
+  const months = [...new Set(state.expenses.map(e => e.date.slice(0,7)))].sort().reverse();
+  const keep = months.includes(filter.month) ? filter.month : 'all';
+  filter.month = keep;
+  monthSel.innerHTML = `<option value="all">ALL PERIODS</option>` +
+    months.map(m => `<option value="${m}" ${m===keep?'selected':''}>${monthLabel(m)}</option>`).join('');
+
+  qs('#currencySelect').value = state.currency;
+}
+
+function renderBreakdown(){
+  const list = getVisibleExpenses();
+  const total = list.reduce((s,e) => s + e.amount, 0);
+  const container = qs('#breakdownList');
+
+  if (activeBreakdownTab === 'farm'){
+    if (!state.farms.length){
+      container.innerHTML = `<p class="text-xs text-[var(--muted)] font-mono py-2 text-center">No entities registered.</p>`;
+      return;
+    }
+    const sums = {};
+    const counts = {};
+    state.farms.forEach(f => { sums[f.id] = 0; counts[f.id] = 0; });
+    list.forEach(e => {
+      sums[e.farmId] = (sums[e.farmId] || 0) + e.amount;
+      counts[e.farmId] = (counts[e.farmId] || 0) + 1;
+    });
+
+    container.innerHTML = state.farms.map(f => {
+      const amt = sums[f.id] || 0;
+      const pct = total > 0 ? (amt / total * 100) : 0;
+      const n = counts[f.id] || 0;
+      return `
+        <div>
+          <div class="flex items-center justify-between gap-3 text-[12.5px]">
+            <span class="flex items-center gap-1.5 font-semibold min-w-0">
+              <span class="font-mono text-xs">${f.glyph || '■'}</span>
+              <span class="truncate">${esc(f.name)}</span>
+              <span class="text-[11px] font-mono font-normal" style="color:var(--faint)">(${n})</span>
+            </span>
+            <span class="num font-mono font-bold whitespace-nowrap">${fmtMoney(amt)}</span>
+          </div>
+          <div class="bd-track"><div class="bd-fill ${f.pattern || 'pat-solid'}" style="width:${pct.toFixed(2)}%;"></div></div>
+          <div class="flex justify-between items-center text-[10.5px] font-mono mt-1" style="color:var(--faint)">
+            <span>${pct.toFixed(1)}% SHARE</span>
+            <span>${f.location ? esc(f.location) : ''}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    // By Category
+    const sums = {};
+    const counts = {};
+    state.categories.forEach(c => { sums[c.name] = 0; counts[c.name] = 0; });
+    list.forEach(e => {
+      sums[e.category] = (sums[e.category] || 0) + e.amount;
+      counts[e.category] = (counts[e.category] || 0) + 1;
+    });
+
+    const sortedCats = [...state.categories].sort((a,b) => (sums[b.name]||0) - (sums[a.name]||0));
+
+    container.innerHTML = sortedCats.map((c, idx) => {
+      const amt = sums[c.name] || 0;
+      const pct = total > 0 ? (amt / total * 100) : 0;
+      const n = counts[c.name] || 0;
+      const pat = c.pattern || MOTIFS[idx % MOTIFS.length].pattern;
+      return `
+        <div>
+          <div class="flex items-center justify-between gap-3 text-[12.5px]">
+            <span class="flex items-center gap-1.5 font-medium min-w-0">
+              <span class="font-mono text-xs">―</span>
+              <span class="truncate">${esc(c.name)}</span>
+              <span class="text-[11px] font-mono font-normal" style="color:var(--faint)">(${n})</span>
+            </span>
+            <span class="num font-mono font-bold whitespace-nowrap">${fmtMoney(amt)}</span>
+          </div>
+          <div class="bd-track"><div class="bd-fill ${pat}" style="width:${pct.toFixed(2)}%;"></div></div>
+          <p class="num font-mono text-[10.5px] mt-1" style="color:var(--faint)">${pct.toFixed(1)}%</p>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+function renderTable(){
+  const list = getVisibleExpenses();
+  const tbody = qs('#expBody');
+  const countEl = qs('#listCount');
+  const filteredCountEl = qs('#filteredCount');
+  const totalCountEl = qs('#totalCount');
+  const filteredSumEl = qs('#filteredSum');
+
+  countEl.textContent = list.length;
+  filteredCountEl.textContent = list.length;
+  totalCountEl.textContent = state.expenses.length;
+
+  const filteredSum = list.reduce((s,e) => s + e.amount, 0);
+  filteredSumEl.textContent = fmtMoney(filteredSum);
+
+  const hasAnyExpenses = state.expenses.length > 0;
+  const hasFilteredExpenses = list.length > 0;
+
+  qs('#emptyState').classList.toggle('hidden', hasAnyExpenses);
+  qs('#emptyFiltered').classList.toggle('hidden', !hasAnyExpenses || hasFilteredExpenses);
+  qs('#expTable').classList.toggle('hidden', !hasFilteredExpenses);
+  qs('#tableFooter').classList.toggle('hidden', !hasFilteredExpenses);
+
+  tbody.innerHTML = list.map(e => {
+    const farm = farmOf(e.farmId);
+    return `
+      <tr data-id="${e.id}" class="${e.id === lastAddedExpenseId ? 'is-new' : ''}">
+        <td data-label="Date" class="whitespace-nowrap font-mono text-[12px]" style="color:var(--muted)">${fmtDate(e.date)}</td>
+        <td data-label="Entity">
+          <span class="farm-badge">
+            <span class="font-mono font-bold text-xs">${farm.glyph || '■'}</span>
+            <span class="truncate max-w-[130px] font-mono">${esc(farm.name)}</span>
+          </span>
+        </td>
+        <td data-label="Category">
+          <span class="cat-badge">
+            <span class="truncate max-w-[130px]">${esc(e.category)}</span>
+          </span>
+        </td>
+        <td data-label="Description">
+          <div>
+            <span class="font-semibold text-[13px] block">${esc(e.desc)}</span>
+            ${e.notes ? `<span class="font-mono text-[11px] block mt-0.5 truncate max-w-[280px]" style="color:var(--muted)">REF: ${esc(e.notes)}</span>` : ''}
+          </div>
+        </td>
+        <td data-label="Debit" class="num font-mono font-bold whitespace-nowrap text-right" style="color:var(--text); font-size:13.5px;">
+          ${fmtMoney(e.amount)}
+        </td>
+        <td data-label="Actions" style="text-align:center">
+          <div class="inline-flex gap-1">
+            <button class="icon-btn" data-action="edit" title="Edit" aria-label="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+            <button class="icon-btn" data-action="delete" title="Delete" aria-label="Delete"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  refreshIcons();
+  if (lastAddedExpenseId){ setTimeout(() => lastAddedExpenseId = null, 1200); }
+}
+
+function refreshIcons(){
+  if (window.lucide) lucide.createIcons();
+}
+
+function renderAll(){
+  renderHeroAndStats();
+  renderFarmSummaryCards();
+  renderFarmPills();
+  renderSelectOptions();
+  renderBreakdown();
+  renderTable();
+  refreshIcons();
+}
+
+/* =====================================================================
+   Expense Form Validation & Execution (Add, Edit, Delete)
+===================================================================== */
+function setErr(input, errEl, msg){
+  const e = qs(errEl);
+  if (msg){
+    e.textContent = msg; e.classList.add('show');
+    qs(input).classList.add('is-invalid');
+  } else {
+    e.classList.remove('show');
+    qs(input).classList.remove('is-invalid');
+  }
+}
+
+function validateExpenseForm(){
+  let firstBad = null;
+  const farmId = qs('#fFarm').value;
+  const desc = qs('#fDesc').value.trim();
+  const amountStr = qs('#fAmount').value;
+  const amount = parseFloat(amountStr);
+  const date = qs('#fDate').value;
+  const category = qs('#fCategory').value;
+  const notes = qs('#fNotes').value.trim();
+
+  if (!farmId){
+    setErr('#fFarm', '#errFarm', 'Register and select an assigned entity first.');
+    firstBad = firstBad || '#fFarm';
+  } else setErr('#fFarm', '#errFarm', null);
+
+  if (!desc){ setErr('#fDesc', '#errDesc', 'Enter item specification.'); firstBad = firstBad || '#fDesc'; }
+  else setErr('#fDesc', '#errDesc', null);
+
+  if (amountStr.trim() === '' || isNaN(amount)){ setErr('#fAmount', '#errAmount', 'Enter numerical amount.'); firstBad = firstBad || '#fAmount'; }
+  else if (amount <= 0){ setErr('#fAmount', '#errAmount', 'Amount must exceed zero.'); firstBad = firstBad || '#fAmount'; }
+  else setErr('#fAmount', '#errAmount', null);
+
+  if (!date){ setErr('#fDate', '#errDate', 'Select transaction date.'); firstBad = firstBad || '#fDate'; }
+  else setErr('#fDate', '#errDate', null);
+
+  if (!category){ setErr('#fCategory', '#errCategory', 'Choose classification.'); firstBad = firstBad || '#fCategory'; }
+  else setErr('#fCategory', '#errCategory', null);
+
+  if (firstBad) qs(firstBad).focus();
+  return firstBad ? null : { farmId, desc, amount: Math.round(amount*100)/100, date, category, notes };
+}
+
+function enterExpenseEdit(e){
+  editingExpenseId = e.id;
+  qs('#fFarm').value = e.farmId;
+  qs('#fDesc').value = e.desc;
+  qs('#fAmount').value = e.amount.toFixed(2);
+  qs('#fCategory').value = e.category;
+  qs('#fDate').value = e.date;
+  qs('#fNotes').value = e.notes || '';
+
+  qs('#formTitle').textContent = 'Modify Transaction';
+  qs('#submitLabel').textContent = 'Save Changes';
+  qs('#cancelEdit').classList.remove('hidden');
+  qs('#editingBadge').classList.remove('hidden');
+  qs('#formCard').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  setTimeout(() => qs('#fDesc').focus({ preventScroll:true }), 250);
+}
+
+function exitExpenseEdit(){
+  editingExpenseId = null;
+  qs('#formTitle').textContent = 'Record Expense';
+  qs('#submitLabel').textContent = 'Commit Entry';
+  qs('#cancelEdit').classList.add('hidden');
+  qs('#editingBadge').classList.add('hidden');
+}
+
+function resetExpenseForm(){
+  exitExpenseEdit();
+  qs('#expForm').reset();
+  qs('#fDate').value = todayISO();
+  if (filter.farmId !== 'all' && state.farms.some(f => f.id === filter.farmId)){
+    qs('#fFarm').value = filter.farmId;
+  }
+  ['#fFarm','#fDesc','#fAmount','#fDate','#fCategory'].forEach(i => qs(i).classList.remove('is-invalid'));
+  qsa('.err').forEach(e => e.classList.remove('show'));
+}
+
+/* Form submission */
+qs('#expForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  if (state.farms.length === 0){
+    openFarmModal();
+    toast('Register a farm entity first');
+    return;
+  }
+
+  const data = validateExpenseForm();
+  if (!data) return;
+
+  if (editingExpenseId){
+    const target = state.expenses.find(e => e.id === editingExpenseId);
+    if (target) Object.assign(target, data);
+    toast('Transaction revised');
+    resetExpenseForm();
+  } else {
+    const newExp = { id: uid(), seq: Date.now(), ...data };
+    state.expenses.unshift(newExp);
+    lastAddedExpenseId = newExp.id;
+    toast(`Entry added for ${farmOf(data.farmId).name}`);
+    resetExpenseForm();
+    qs('#fDesc').focus({ preventScroll:true });
+  }
+  saveState();
+  renderAll();
+});
+
+qs('#cancelEdit').addEventListener('click', resetExpenseForm);
+
+['#fFarm','#fDesc','#fAmount','#fDate','#fCategory'].forEach(s =>
+  qs(s).addEventListener('input', () => qs(s).classList.remove('is-invalid'))
+);
+
+/* =====================================================================
+   Farm Modal & Entity Management (Add, Edit, Delete)
+===================================================================== */
+const farmModal = qs('#farmModal');
+const openFarmModal = (farmToEdit = null) => {
+  renderFarmModalList();
+  renderMotifPicker();
+  farmModal.classList.add('open');
+  refreshIcons();
+
+  if (farmToEdit){
+    enterFarmEdit(farmToEdit);
+  } else {
+    resetFarmForm();
+    setTimeout(() => qs('#farmNameInput').focus(), 80);
+  }
+};
+const closeFarmModal = () => {
+  farmModal.classList.remove('open');
+  resetFarmForm();
+};
+
+qs('#manageFarmsBtn').addEventListener('click', () => openFarmModal());
+qs('#quickAddFarmBtn').addEventListener('click', () => openFarmModal());
+qs('#addFarmHeaderBtn').addEventListener('click', () => openFarmModal());
+qs('#addFirstFarmBtn').addEventListener('click', () => openFarmModal());
+qs('#closeFarmModal').addEventListener('click', closeFarmModal);
+qs('#farmModalOverlay').addEventListener('click', closeFarmModal);
+
+function renderMotifPicker(){
+  const row = qs('#glyphPickerRow');
+  row.innerHTML = MOTIFS.map((m, idx) => `
+    <button type="button" class="w-8 h-8 rounded border font-mono font-bold text-xs flex items-center justify-center transition-all ${selectedMotifIndex === idx ? 'bg-[var(--text)] text-[var(--bg)] border-[var(--text)]' : 'border-[var(--border)] hover:border-[var(--text)]'}"
+            data-motif-idx="${idx}">
+      ${m.glyph}
+    </button>
+  `).join('');
+  row.querySelectorAll('[data-motif-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedMotifIndex = parseInt(btn.dataset.motifIdx, 10);
+      renderMotifPicker();
+    });
+  });
+}
+
+function enterFarmEdit(farm){
+  editingFarmId = farm.id;
+  qs('#farmFormHeading').textContent = `Edit Entity [${farm.code || '00'}]`;
+  qs('#farmEditingBadge').classList.remove('hidden');
+  qs('#farmNameInput').value = farm.name;
+  qs('#farmLocInput').value = farm.location || '';
+  qs('#farmSubmitBtn').textContent = '✓ Save Entity Changes';
+  qs('#cancelFarmEditBtn').classList.remove('hidden');
+
+  const idx = MOTIFS.findIndex(m => m.glyph === farm.glyph);
+  selectedMotifIndex = idx !== -1 ? idx : 0;
+  renderMotifPicker();
+  qs('#farmNameInput').focus();
+}
+
+function resetFarmForm(){
+  editingFarmId = null;
+  qs('#farmFormHeading').textContent = 'Add Registered Entity';
+  qs('#farmEditingBadge').classList.add('hidden');
+  qs('#farmNameInput').value = '';
+  qs('#farmLocInput').value = '';
+  qs('#farmSubmitBtn').textContent = '+ Add Entity to Registry';
+  qs('#cancelFarmEditBtn').classList.add('hidden');
+  qs('#farmFormErr').classList.remove('show');
+}
+
+qs('#cancelFarmEditBtn').addEventListener('click', resetFarmForm);
+
+function renderFarmModalList(){
+  const list = qs('#farmModalList');
+  if (state.farms.length === 0){
+    list.innerHTML = `<p class="p-4 text-xs font-mono text-center text-[var(--muted)]">No entities registered yet.</p>`;
+    return;
+  }
+
+  list.innerHTML = state.farms.map(f => {
+    const expenseCount = state.expenses.filter(e => e.farmId === f.id).length;
+    return `
+      <div class="flex items-center justify-between p-3 gap-3 bg-[var(--card)]" style="border-color:var(--border)">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-7 h-7 rounded border flex items-center justify-center font-mono font-bold text-xs flex-none" style="border-color:var(--border)">
+            ${f.glyph || '■'}
+          </span>
+          <div class="min-w-0">
+            <p class="font-bold text-[13px] truncate font-mono">[${f.code||'--'}] ${esc(f.name)}</p>
+            <p class="text-[11px]" style="color:var(--muted)">
+              ${f.location ? `${esc(f.location)} · ` : ''}${expenseCount} transaction${expenseCount!==1?'s':''}
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button class="icon-btn" data-edit-farm-modal="${f.id}" title="Edit Entity" aria-label="Edit"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+          <button class="icon-btn" data-del-farm-modal="${f.id}" title="Remove Entity" aria-label="Delete"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('[data-edit-farm-modal]').forEach(b => {
+    b.addEventListener('click', () => {
+      const target = farmOf(b.dataset.editFarmModal);
+      enterFarmEdit(target);
+    });
+  });
+
+  list.querySelectorAll('[data-del-farm-modal]').forEach(b => {
+    b.addEventListener('click', () => {
+      deleteFarm(b.dataset.delFarmModal);
+    });
+  });
+  refreshIcons();
+}
+
+function deleteFarm(farmId){
+  const target = farmOf(farmId);
+  const expenseCount = state.expenses.filter(e => e.farmId === farmId).length;
+  const msg = expenseCount > 0
+    ? `Entity "${target.name}" has ${expenseCount} recorded transaction${expenseCount!==1?'s':''}.\nDeleting this entity will also remove its associated transactions.\n\nProceed?`
+    : `Remove entity "${target.name}"?`;
+
+  if (confirm(msg)){
+    state.farms = state.farms.filter(f => f.id !== farmId);
+    state.expenses = state.expenses.filter(e => e.farmId !== farmId);
+    if (filter.farmId === farmId) filter.farmId = 'all';
+    saveState();
+    renderFarmModalList();
+    renderAll();
+    toast(`Entity "${target.name}" removed`);
+  }
+}
+
+qs('#farmForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const name = qs('#farmNameInput').value.trim();
+  const loc = qs('#farmLocInput').value.trim();
+  const err = qs('#farmFormErr');
+
+  if (!name){ err.textContent = 'Enter an entity name.'; err.classList.add('show'); return; }
+
+  // Check duplicate name
+  const isDuplicate = state.farms.some(f => f.name.toLowerCase() === name.toLowerCase() && f.id !== editingFarmId);
+  if (isDuplicate){
+    err.textContent = 'An entity with this name already exists.'; err.classList.add('show'); return;
+  }
+  err.classList.remove('show');
+
+  const motif = MOTIFS[selectedMotifIndex % MOTIFS.length];
+
+  if (editingFarmId){
+    // Update existing farm
+    const target = state.farms.find(f => f.id === editingFarmId);
+    if (target){
+      target.name = name;
+      target.location = loc;
+      target.glyph = motif.glyph;
+      target.pattern = motif.pattern;
+      toast(`Entity "${name}" updated`);
+    }
+    resetFarmForm();
+  } else {
+    // Add new farm
+    const nextNum = state.farms.length + 1;
+    const code = String(nextNum).padStart(2, '0');
+    const newFarm = {
+      id: 'farm-' + Date.now(),
+      name,
+      location: loc,
+      glyph: motif.glyph,
+      pattern: motif.pattern,
+      code
+    };
+    state.farms.push(newFarm);
+    selectedMotifIndex = (selectedMotifIndex + 1) % MOTIFS.length;
+    resetFarmForm();
+    toast(`Entity "${name}" registered`);
+  }
+
+  saveState();
+  renderFarmModalList();
+  renderAll();
+});
+
+/* =====================================================================
+   Interaction on Farm Overview Cards (Filter, Add Expense, Edit)
+===================================================================== */
+qs('#farmCardsGrid').addEventListener('click', ev => {
+  // Quick Edit Farm
+  const editBtn = ev.target.closest('[data-farm-edit]');
+  if (editBtn){
+    ev.stopPropagation();
+    const farmId = editBtn.dataset.farmEdit;
+    openFarmModal(farmOf(farmId));
+    return;
+  }
+
+  // Quick Add Expense for this farm
+  const addExpBtn = ev.target.closest('[data-farm-add-exp]');
+  if (addExpBtn){
+    ev.stopPropagation();
+    const farmId = addExpBtn.dataset.farmAddExp;
+    filter.farmId = farmId;
+    qs('#fFarm').value = farmId;
+    renderAll();
+    qs('#formCard').scrollIntoView({ behavior:'smooth', block:'nearest' });
+    setTimeout(() => qs('#fDesc').focus(), 250);
+    return;
+  }
+
+  // Click card body to toggle filter
+  const card = ev.target.closest('.farm-card');
+  if (card){
+    const farmId = card.dataset.farmId;
+    filter.farmId = (filter.farmId === farmId) ? 'all' : farmId;
+    if (filter.farmId !== 'all') qs('#fFarm').value = filter.farmId;
+    renderAll();
+  }
+});
+
+qs('#viewAllFarmsBtn').addEventListener('click', () => {
+  filter.farmId = 'all';
+  renderAll();
+});
+
+qs('#farmPillRow').addEventListener('click', ev => {
+  const pill = ev.target.closest('.fchip');
+  if (!pill) return;
+  filter.farmId = pill.dataset.farmFilter;
+  if (filter.farmId !== 'all') qs('#fFarm').value = filter.farmId;
+  renderAll();
+});
+
+/* Category and Month filters */
+qs('#categoryFilterSelect').addEventListener('change', ev => {
+  filter.category = ev.target.value;
+  renderAll();
+});
+
+qs('#monthSelect').addEventListener('change', ev => {
+  filter.month = ev.target.value;
+  renderAll();
+});
+
+/* Search input */
+const searchInput = qs('#searchInput');
+const clearSearchBtn = qs('#clearSearchBtn');
+searchInput.addEventListener('input', () => {
+  filter.query = searchInput.value;
+  clearSearchBtn.classList.toggle('hidden', !filter.query);
+  renderAll();
+});
+clearSearchBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  filter.query = '';
+  clearSearchBtn.classList.add('hidden');
+  renderAll();
+  searchInput.focus();
+});
+
+const resetFilters = () => {
+  filter.farmId = 'all';
+  filter.category = 'All';
+  filter.month = 'all';
+  filter.query = '';
+  searchInput.value = '';
+  clearSearchBtn.classList.add('hidden');
+  renderAll();
+  toast('Criteria cleared');
+};
+qs('#resetFiltersBtn').addEventListener('click', resetFilters);
+
+/* Currency Switcher */
+qs('#currencySelect').addEventListener('change', ev => {
+  state.currency = ev.target.value;
+  saveState();
+  renderAll();
+  toast(`Currency updated: ${state.currency}`);
+});
+
+/* Breakdown tabs */
+qs('#tabByFarm').addEventListener('click', () => {
+  activeBreakdownTab = 'farm';
+  qs('#tabByFarm').className = 'px-2.5 py-1 rounded transition-all font-bold bg-[var(--text)] text-[var(--bg)]';
+  qs('#tabByCat').className = 'px-2.5 py-1 rounded transition-all text-[var(--muted)] hover:text-[var(--text)]';
+  renderBreakdown();
+});
+
+qs('#tabByCat').addEventListener('click', () => {
+  activeBreakdownTab = 'category';
+  qs('#tabByCat').className = 'px-2.5 py-1 rounded transition-all font-bold bg-[var(--text)] text-[var(--bg)]';
+  qs('#tabByFarm').className = 'px-2.5 py-1 rounded transition-all text-[var(--muted)] hover:text-[var(--text)]';
+  renderBreakdown();
+});
+
+/* Table Edit & Delete actions */
+qs('#expBody').addEventListener('click', ev => {
+  const btn = ev.target.closest('button[data-action]');
+  if (!btn) return;
+  const tr = btn.closest('tr');
+  const id = tr.dataset.id;
+  const exp = state.expenses.find(e => e.id === id);
+  if (!exp) return;
+
+  if (btn.dataset.action === 'edit'){
+    enterExpenseEdit(exp);
+  } else if (btn.dataset.action === 'delete'){
+    if (confirm(`Expunge transaction "${exp.desc}"?`)){
+      tr.classList.add('leaving');
+      setTimeout(() => {
+        state.expenses = state.expenses.filter(e => e.id !== id);
+        if (editingExpenseId === id) resetExpenseForm();
+        saveState();
+        renderAll();
+        toast('Record expunged');
+      }, 150);
+    }
+  }
+});
+
+/* =====================================================================
+   Category Modal
+===================================================================== */
+const catModal = qs('#catModal');
+const openCatModal = () => { renderCatModalList(); catModal.classList.add('open'); refreshIcons(); setTimeout(() => qs('#newCatName').focus(), 80); };
+const closeCatModal = () => catModal.classList.remove('open');
+
+qs('#manageCatsBtn').addEventListener('click', openCatModal);
+qs('#closeCatModal').addEventListener('click', closeCatModal);
+qs('#catModalOverlay').addEventListener('click', closeCatModal);
+
+function renderCatModalList(){
+  const list = qs('#catList');
+  list.innerHTML = state.categories.map((c, i) => {
+    const used = state.expenses.filter(e => e.category === c.name).length;
+    const canDelete = c.custom && used === 0;
+    return `
+      <div class="flex items-center justify-between p-3 gap-3 bg-[var(--card)]" style="border-color:var(--border)">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="font-mono text-xs">0${i+1}</span>
+          <div class="min-w-0">
+            <p class="font-medium text-[13px] truncate">${esc(c.name)}</p>
+            <p class="font-mono text-[10.5px]" style="color:var(--faint)">${c.custom ? 'Custom' : 'Standard'} · ${used} entries</p>
+          </div>
+        </div>
+        <div>
+          ${canDelete
+            ? `<button class="icon-btn" data-del-cat="${esc(c.name)}" title="Remove" aria-label="Delete"><i data-lucide="x" class="w-4 h-4"></i></button>`
+            : `<span class="icon-btn opacity-30 cursor-not-allowed"><i data-lucide="${c.custom ? 'x' : 'lock'}" class="w-3.5 h-3.5"></i></span>`}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('[data-del-cat]').forEach(b => {
+    b.addEventListener('click', () => {
+      const name = b.dataset.delCat;
+      state.categories = state.categories.filter(c => c.name !== name);
+      if (filter.category === name) filter.category = 'All';
+      saveState();
+      renderCatModalList();
+      renderAll();
+      toast(`Category "${name}" removed`);
+    });
+  });
+  refreshIcons();
+}
+
+qs('#catForm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const name = qs('#newCatName').value.trim();
+  const err = qs('#catErr');
+  if (!name){ err.textContent = 'Specify category name.'; err.classList.add('show'); return; }
+  if (state.categories.some(c => c.name.toLowerCase() === name.toLowerCase())){
+    err.textContent = 'Classification already exists.'; err.classList.add('show'); return;
+  }
+  err.classList.remove('show');
+
+  const patIdx = state.categories.length % MOTIFS.length;
+  state.categories.push({
+    name,
+    pattern: MOTIFS[patIdx].pattern,
+    custom: true
+  });
+  qs('#newCatName').value = '';
+  saveState();
+  renderCatModalList();
+  renderAll();
+  toast(`Category "${name}" added`);
+});
+
+/* =====================================================================
+   Data Menu (CSV, Backup JSON, Restore, Reset)
+===================================================================== */
+const dataMenuBtn = qs('#dataMenuBtn');
+const dataDropdown = qs('#dataDropdown');
+dataMenuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  dataDropdown.classList.toggle('hidden');
+});
+document.addEventListener('click', () => dataDropdown.classList.add('hidden'));
+
+// CSV Export
+qs('#exportCsvBtn').addEventListener('click', () => {
+  const list = getVisibleExpenses();
+  if (!list.length){ toast('Empty register'); return; }
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const headers = ['Date', 'Entity', 'Category', 'Description', 'Voucher_Ref', 'Amount', 'Currency'];
+  const rows = [
+    headers.map(q).join(','),
+    ...list.map(e => [
+      e.date,
+      farmOf(e.farmId).name,
+      e.category,
+      e.desc,
+      e.notes || '',
+      e.amount.toFixed(2),
+      state.currency
+    ].map(q).join(','))
+  ];
+  const blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `agri-ledger-${todayISO()}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`Exported ${list.length} rows to CSV`);
+});
+
+// JSON Export
+qs('#exportJsonBtn').addEventListener('click', () => {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `agri-ledger-backup-${todayISO()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Ledger state archived to JSON');
+});
+
+// JSON Restore
+qs('#importJsonInput').addEventListener('change', ev => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (parsed && Array.isArray(parsed.expenses) && Array.isArray(parsed.farms)){
+        if (confirm(`Restore ${parsed.expenses.length} records into ledger? Current unsaved entries will be overwritten.`)){
+          state = parsed;
+          saveState();
+          renderAll();
+          toast('Ledger database restored');
+        }
+      } else {
+        alert('Invalid AgriLedger database archive format.');
+      }
+    } catch(err){
+      alert('Failed to parse JSON file.');
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+});
+
+// Reset Ledger
+qs('#clearAllBtn').addEventListener('click', () => {
+  if (confirm('Clear all entries and entities in the ledger?')){
+    state.expenses = [];
+    state.farms = [];
+    filter.farmId = 'all';
+    saveState();
+    renderAll();
+    toast('Ledger reset');
+  }
+});
+
+// Escape key closes modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){
+    closeFarmModal();
+    closeCatModal();
+  }
+});
+
+/* --- Initialize Application --- */
+function init(){
+  loadState();
+  qs('#fDate').value = todayISO();
+  renderAll();
+  refreshIcons();
+}
+
+init();
+</script>
+</body>
+</html>
